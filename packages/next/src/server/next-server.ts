@@ -238,9 +238,10 @@ export default class NextNodeServer extends BaseServer {
     this.middlewareManifestPath = join(this.serverDistDir, MIDDLEWARE_MANIFEST)
   }
 
-  protected async handleUpgrade(): Promise<void> {
+  protected async handleUpgrade(...args: any): Promise<void> {
     // The web server does not support web sockets, it's only used for HMR in
     // development.
+    console.log('handleUpgrade:...args', ...args)
   }
 
   protected async prepareImpl() {
@@ -1027,6 +1028,7 @@ export default class NextNodeServer extends BaseServer {
     })
 
     const handler = super.getRequestHandler()
+    // HERE is getRequestHandler
     return (req, res, parsedUrl) => {
       const normalizedReq = this.normalizeReq(req)
       const normalizedRes = this.normalizeRes(res)
