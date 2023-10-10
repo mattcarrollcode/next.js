@@ -14,9 +14,6 @@ export default function handler(req, res) {
   })
   res.socket.server.io = io
 
-  const count2 = io.of('/api/my_awesome_socket').sockets.size
-  console.log('count2', count2)
-
   const onConnection = (socket) => {
     console.log('New connection', socket.id)
 
@@ -43,12 +40,12 @@ export default function handler(req, res) {
     })
 
     socket.conn.on('packet', ({ type, data }) => {
-      console.log('packet', type, data)
+      // console.log('packet', type, data)
       // called for each packet received
     })
 
     socket.conn.on('packetCreate', ({ type, data }) => {
-      console.log('packetCreate', type, data)
+      // console.log('packetCreate', type, data)
       // called for each packet sent
     })
 

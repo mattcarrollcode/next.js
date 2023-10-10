@@ -1298,13 +1298,14 @@ export default abstract class Server<ServerOptions extends Options = Options> {
   }
 
   public getRequestHandler(): BaseRequestHandler {
-    console.log('getRequestHandler base')
     return this.handleRequest.bind(this)
   }
 
-  protected handleUpgrade(req: BaseNextRequest, socket: any, head?: any) {
-    console.log('handleUpgrade base')
-  }
+  protected abstract handleUpgrade(
+    req: BaseNextRequest,
+    socket: any,
+    head?: any
+  ): void
 
   public setAssetPrefix(prefix?: string): void {
     this.renderOpts.assetPrefix = prefix ? prefix.replace(/\/$/, '') : ''

@@ -154,7 +154,6 @@ export async function startServer({
     server.keepAliveTimeout = keepAliveTimeout
   }
   server.on('upgrade', async (req, socket, head) => {
-    console.log('server on upgrade', upgradeHandler)
     try {
       await upgradeHandler(req, socket, head)
     } catch (err) {

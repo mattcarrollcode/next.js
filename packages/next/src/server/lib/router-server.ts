@@ -594,14 +594,23 @@ export async function initialize(opts: {
         isUpgradeReq: true,
         signal: signalFromNodeResponse(socket),
       })
+      console.log(
+        'debug:matchedOutput',
+        matchedOutput,
+        'parsedUrl.protocol',
+        parsedUrl.protocol,
+        'req.socket',
+        req.socket == socket
+      )
 
       // TODO: allow upgrade requests to pages/app paths?
       // this was not previously supported
-      if (matchedOutput) {
+      if (!matchedOutput && !req.socket) {
         return socket.end()
       }
 
-      if (parsedUrl.protocol) {
+      console.log('x-forwarded-proto', req.headers['x-forwarded-proto'])
+      if (!parsedUrl.protocol) {
         return await proxyRequest(req, socket as any, parsedUrl, head)
       }
       // no match close socket

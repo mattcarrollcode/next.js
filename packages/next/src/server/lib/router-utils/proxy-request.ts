@@ -16,6 +16,8 @@ export async function proxyRequest(
   delete (parsedUrl as any).query
   parsedUrl.search = stringifyQuery(req as any, query)
 
+  console.log('upgradeHead', !!upgradeHead)
+
   const target = url.format(parsedUrl)
   const HttpProxy =
     require('next/dist/compiled/http-proxy') as typeof import('next/dist/compiled/http-proxy')
