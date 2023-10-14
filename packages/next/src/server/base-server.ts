@@ -246,6 +246,7 @@ type BaseRenderOpts = {
   appDirDevErrorLogger?: (err: any) => Promise<void>
   strictNextHead: boolean
   isExperimentalCompile?: boolean
+  ppr: boolean
 }
 
 export interface BaseRequestHandler {
@@ -506,6 +507,7 @@ export default abstract class Server<ServerOptions extends Options = Options> {
 
       // @ts-expect-error internal field not publicly exposed
       isExperimentalCompile: this.nextConfig.experimental.isExperimentalCompile,
+      ppr: this.nextConfig.experimental.ppr === true,
     }
 
     // Initialize next/config with the environment configuration
@@ -1693,6 +1695,13 @@ export default abstract class Server<ServerOptions extends Options = Options> {
       ) &&
       (isSSG || hasServerProps)
 
+    /**
+     * If true, this indicates that the request being made is for an app
+     * prefetch request.
+     */
+    const isAppPrefetch =
+      req.headers[NEXT_ROUTER_PREFETCH.toLowerCase()] === '1'
+
     // when we are handling a middleware prefetch and it doesn't
     // resolve to a static data route we bail early to avoid
     // unexpected SSR invocations
@@ -1971,10 +1980,12 @@ export default abstract class Server<ServerOptions extends Options = Options> {
           | 'https',
       })
 
-    const doRender: () => Promise<ResponseCacheEntry | null> = async () => {
+    const doRender: (
+      postponed?: string
+    ) => Promise<ResponseCacheEntry | null> = async (postponed?: string) => {
       // In development, we always want to generate dynamic HTML.
       const supportsDynamicHTML =
-        (!isDataReq && opts.dev) || !(isSSG || hasStaticPaths)
+        (!isDataReq && opts.dev) || !(isSSG || hasStaticPaths) || !!postponed
 
       let headers: OutgoingHttpHeaders | undefined
 
@@ -2030,6 +2041,7 @@ export default abstract class Server<ServerOptions extends Options = Options> {
         isOnDemandRevalidate,
         isDraftMode: isPreviewMode,
         isServerAction,
+        postponed,
       }
 
       // Legacy render methods will return a render result that needs to be
@@ -2043,6 +2055,8 @@ export default abstract class Server<ServerOptions extends Options = Options> {
           params: opts.params,
           prerenderManifest,
           renderOpts: {
+            // App Route's cannot postpone, so don't enable it.
+            ppr: false,
             originalPathname: components.ComponentMod.originalPathname,
             supportsDynamicHTML,
             incrementalCache,
@@ -2132,12 +2146,9 @@ export default abstract class Server<ServerOptions extends Options = Options> {
       } else if (
         components.routeModule?.definition.kind === RouteKind.APP_PAGE
       ) {
-        const isAppPrefetch = req.headers[NEXT_ROUTER_PREFETCH.toLowerCase()]
-
         if (isAppPrefetch && process.env.NODE_ENV === 'production') {
           try {
             const prefetchRsc = await this.getPrefetchRsc(resolvedUrlPathname)
-
             if (prefetchRsc) {
               res.setHeader(
                 'cache-control',
@@ -2147,9 +2158,9 @@ export default abstract class Server<ServerOptions extends Options = Options> {
               res.body(prefetchRsc).send()
               return null
             }
-          } catch (_) {
-            // we fallback to invoking the function if prefetch
-            // data is not available
+          } catch {
+            // We fallback to invoking the function if prefetch data is not
+            // available.
           }
         }
 
@@ -2252,6 +2263,7 @@ export default abstract class Server<ServerOptions extends Options = Options> {
           kind: 'PAGE',
           html: result,
           pageData: metadata.pageData,
+          postponed: metadata.postponed,
           headers,
           status: isAppPath ? res.statusCode : undefined,
         },
@@ -2360,10 +2372,14 @@ export default abstract class Server<ServerOptions extends Options = Options> {
               const html = await this.getFallback(
                 locale ? `/${locale}${pathname}` : pathname
               )
+
               return {
                 value: {
                   kind: 'PAGE',
                   html: RenderResult.fromStatic(html),
+                  postponed: undefined,
+                  status: undefined,
+                  headers: undefined,
                   pageData: {},
                 },
               }
@@ -2529,11 +2545,62 @@ export default abstract class Server<ServerOptions extends Options = Options> {
           res.statusCode = cachedData.status
         }
 
+        if (isDataReq) {
+          if (cachedData.postponed && !isAppPrefetch) {
+            const result = await doRender(cachedData.postponed)
+            if (!result) {
+              return null
+            }
+
+            if (result.value?.kind !== 'PAGE') {
+              throw new Error('Invariant: Expected a page response')
+            }
+
+            return {
+              type: 'rsc',
+              body: RenderResult.fromStatic(result.value.pageData as string),
+              revalidate: cacheEntry.revalidate,
+            }
+          }
+
+          return {
+            type: 'rsc',
+            body: RenderResult.fromStatic(cachedData.pageData as string),
+            revalidate: cacheEntry.revalidate,
+          }
+        }
+
+        let body = cachedData.html
+
+        // If the request has a postponed state, let's try and resume it...
+        if (cachedData.postponed) {
+          const transformer = new TransformStream<Uint8Array, Uint8Array>()
+
+          // Perform the second render, now with the postponed state.
+          doRender(cachedData.postponed)
+            .then(async (result) => {
+              if (!result) {
+                throw new Error('Invariant: Expected a result to be returned')
+              }
+
+              if (result.value?.kind !== 'PAGE') {
+                throw new Error('Invariant: Expected a page response')
+              }
+
+              // Pipe the resume result to the transformer.
+              await result.value.html.pipeTo(transformer.writable)
+            })
+            .catch((err) => {
+              console.error('Error while resuming postponed state', err)
+            })
+
+          // Chain this new transformer readable to the existing body.
+          body.chain(transformer.readable)
+        }
+
         return {
-          type: isDataReq ? 'rsc' : 'html',
-          body: isDataReq
-            ? RenderResult.fromStatic(cachedData.pageData as string)
-            : cachedData.html,
+          type: 'html',
+          body,
           revalidate: cacheEntry.revalidate,
         }
       }
