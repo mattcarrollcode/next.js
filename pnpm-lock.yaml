@@ -561,8 +561,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       ws:
-        specifier: 8.2.3
-        version: 8.2.3(bufferutil@4.0.7)(utf-8-validate@6.0.3)
+        specifier: 8.14.2
+        version: 8.14.2(bufferutil@4.0.7)(utf-8-validate@6.0.3)
 
   bench/app-router-server:
     dependencies:
@@ -1430,8 +1430,8 @@ importers:
         specifier: npm:webpack-sources@3.2.3
         version: /webpack-sources@3.2.3
       ws:
-        specifier: 8.2.3
-        version: 8.2.3(bufferutil@4.0.7)(utf-8-validate@6.0.3)
+        specifier: 8.14.2
+        version: 8.14.2(bufferutil@4.0.7)(utf-8-validate@6.0.3)
       zod:
         specifier: 3.22.3
         version: 3.22.3
@@ -21852,7 +21852,7 @@ packages:
       jszip: 3.7.1
       rimraf: 3.0.2
       tmp: 0.2.1
-      ws: 8.4.2(bufferutil@4.0.7)(utf-8-validate@6.0.3)
+      ws: 8.14.2(bufferutil@4.0.7)(utf-8-validate@6.0.3)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -24909,38 +24909,6 @@ packages:
     peerDependencies:
       bufferutil: ^4.0.1
       utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-    dependencies:
-      bufferutil: 4.0.7
-      utf-8-validate: 6.0.3
-    dev: true
-
-  /ws@8.2.3(bufferutil@4.0.7)(utf-8-validate@6.0.3):
-    resolution: {integrity: sha512-wBuoj1BDpC6ZQ1B7DWQBYVLphPWkm8i9Y0/3YdHjHKHiohOJ1ws+3OccDWtH+PoC9DZD5WOTrJvNbWvjS6JWaA==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: ^5.0.2
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-    dependencies:
-      bufferutil: 4.0.7
-      utf-8-validate: 6.0.3
-    dev: true
-
-  /ws@8.4.2(bufferutil@4.0.7)(utf-8-validate@6.0.3):
-    resolution: {integrity: sha512-Kbk4Nxyq7/ZWqr/tarI9yIt/+iNNFOjBXEWgTb4ydaNHBNGgvf2QHbS9fdfsndfjFlFwEd4Al+mw83YkaD10ZA==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: ^5.0.2
     peerDependenciesMeta:
       bufferutil:
         optional: true

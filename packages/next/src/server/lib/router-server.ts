@@ -575,11 +575,11 @@ export async function initialize(opts: {
     try {
       req.on('error', (_err) => {
         // TODO: log socket errors?
-        // console.error(_err);
+        console.error('req errors', _err)
       })
       socket.on('error', (_err) => {
         // TODO: log socket errors?
-        // console.error(_err);
+        console.error('socket errors', _err)
       })
 
       if (opts.dev && developmentBundler) {
@@ -598,9 +598,7 @@ export async function initialize(opts: {
         'debug:matchedOutput',
         matchedOutput,
         'parsedUrl.protocol',
-        parsedUrl.protocol,
-        'req.socket',
-        req.socket == socket
+        parsedUrl.protocol
       )
 
       // TODO: allow upgrade requests to pages/app paths?
@@ -609,8 +607,10 @@ export async function initialize(opts: {
         return socket.end()
       }
 
-      console.log('x-forwarded-proto', req.headers['x-forwarded-proto'])
-      if (!parsedUrl.protocol) {
+      req.headers['x-forwarded-proto'] = 'ws'
+
+      // console.log('x-forwarded-proto', req.headers['x-forwarded-proto'], 'req.url', req.url)
+      if (parsedUrl.protocol) {
         return await proxyRequest(req, socket as any, parsedUrl, head)
       }
       // no match close socket
