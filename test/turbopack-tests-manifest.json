@@ -3727,6 +3727,7 @@
     "failed": [
       "app dir - rsc basics react@experimental should opt into the react@experimental when enabling ppr",
       "app dir - rsc basics react@experimental should opt into the react@experimental when enabling serverActions",
+      "app dir - rsc basics react@experimental should opt into the react@experimental when enabling taint",
       "app dir - rsc basics should create client reference successfully for all file conventions",
       "app dir - rsc basics should support next/link in server components",
       "app dir - rsc basics should support webpack loader rules"
@@ -3792,6 +3793,15 @@
     "pending": [],
     "flakey": [],
     "runtimeError": false
+  },
+  "test/e2e/app-dir/taint/process-taint.test.ts": {
+    "passed": [],
+    "failed": [
+      "app dir - taint should error when passing process env to client component"
+    ],
+    "pending": [],
+    "flakey": [],
+    "runtimeError": true
   },
   "test/e2e/app-dir/test-template/{{ toFileName name }}/{{ toFileName name }}.test.ts": {
     "passed": [
@@ -5562,7 +5572,9 @@
       "transpile packages css should handle css modules imports inside transpiled modules",
       "transpile packages css should handle global css imports inside transpiled modules",
       "transpile packages css should handle global scss imports inside transpiled modules",
-      "transpile packages css should handle scss modules imports inside transpiled modules"
+      "transpile packages css should handle scss modules imports inside transpiled modules",
+      "transpile packages optional deps should hide dynammic module dependency errors from node_modules",
+      "transpile packages optional deps should not throw an error when optional deps are not installed"
     ],
     "failed": [],
     "pending": [],
