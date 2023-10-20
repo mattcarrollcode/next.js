@@ -2557,6 +2557,10 @@ export default abstract class Server<ServerOptions extends Options = Options> {
               throw new Error('Invariant: Expected a page response')
             }
 
+            if (!result.value.pageData) {
+              throw new Error('Invariant: Expected pageData to be defined')
+            }
+
             return {
               type: 'rsc',
               body: RenderResult.fromStatic(result.value.pageData as string),
