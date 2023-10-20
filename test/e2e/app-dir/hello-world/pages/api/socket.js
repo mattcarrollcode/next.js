@@ -1,7 +1,6 @@
 import { Server } from 'socket.io'
 
 export default function handler(req, res) {
-  // console.log("req", req)
   if (res.socket.server.io) {
     console.log('Server already started!')
     res.end()
@@ -10,19 +9,14 @@ export default function handler(req, res) {
 
   const io = new Server(res.socket.server, {
     path: '/api/my_awesome_socket',
-    // serveClient: false
   })
   res.socket.server.io = io
 
   const onConnection = (socket) => {
-    console.log('New connection', socket.id)
-
-    // console.log('eq headers', socket.handshake.headers ); // prints "true"
-
-    const transport = socket.conn.transport.name // in most cases, "polling"
+    const transport = socket.conn.transport.name
 
     socket.conn.on('upgrade', () => {
-      const upgradedTransport = socket.conn.transport.name // in most cases, "websocket"
+      const upgradedTransport = socket.conn.transport.name
 
       console.log(
         'server:Transport was upgraded',
@@ -30,33 +24,6 @@ export default function handler(req, res) {
         '->',
         upgradedTransport
       )
-    })
-
-    console.log('initial transport', socket.conn.transport.name) // prints "polling"
-
-    socket.conn.once('upgrade', () => {
-      // called when the transport is upgraded (i.e. from HTTP long-polling to WebSocket)
-      console.log('upgraded transport', socket.conn.transport.name) // prints "websocket"
-    })
-
-    socket.conn.on('packet', ({ type, data }) => {
-      // console.log('packet', type, data)
-      // called for each packet received
-    })
-
-    socket.conn.on('packetCreate', ({ type, data }) => {
-      // console.log('packetCreate', type, data)
-      // called for each packet sent
-    })
-
-    socket.conn.on('drain', () => {
-      console.log('drain')
-      // called when the write buffer is drained
-    })
-
-    socket.conn.on('close', (reason) => {
-      console.log('close', reason)
-      // called when the underlying connection is closed
     })
 
     socket.on('createdMessage', (msg) => {

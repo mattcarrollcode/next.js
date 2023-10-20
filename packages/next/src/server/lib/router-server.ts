@@ -594,27 +594,16 @@ export async function initialize(opts: {
         isUpgradeReq: true,
         signal: signalFromNodeResponse(socket),
       })
-      console.log(
-        'debug:matchedOutput',
-        matchedOutput,
-        'parsedUrl.protocol',
-        parsedUrl.protocol
-      )
 
-      // TODO: allow upgrade requests to pages/app paths?
-      // this was not previously supported
       if (!matchedOutput && !req.socket) {
         return socket.end()
       }
 
-      req.headers['x-forwarded-proto'] = 'ws'
-
-      // console.log('x-forwarded-proto', req.headers['x-forwarded-proto'], 'req.url', req.url)
+      // Do not end socket again if protocol is present
       if (parsedUrl.protocol) {
         return await proxyRequest(req, socket as any, parsedUrl, head)
       }
       // no match close socket
-      socket.end()
     } catch (err) {
       console.error('Error handling upgrade request', err)
       socket.end()

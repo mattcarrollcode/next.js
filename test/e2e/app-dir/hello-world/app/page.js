@@ -28,12 +28,9 @@ export default function Home() {
           upgradedTransport
         )
       })
-
-      console.log('Connected', socket)
     })
 
     socket.on('newIncomingMessage', (msg) => {
-      console.log('New message in client', msg)
       setValue(msg)
     })
   }
