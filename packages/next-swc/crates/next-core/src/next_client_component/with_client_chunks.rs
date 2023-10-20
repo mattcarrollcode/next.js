@@ -110,7 +110,9 @@ impl WithClientChunksChunkItem {
     async fn chunks(self: Vc<Self>) -> Result<Vc<OutputAssets>> {
         let this = self.await?;
         let inner = this.inner.await?;
-        Ok(this.context.root_chunk_group(Vc::upcast(inner.asset)))
+        Ok(this
+            .context
+            .root_chunk_group_assets(Vc::upcast(inner.asset)))
     }
 
     #[turbo_tasks::function]
