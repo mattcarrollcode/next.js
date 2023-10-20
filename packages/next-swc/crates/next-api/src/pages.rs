@@ -653,6 +653,7 @@ impl PageEndpoint {
                 ssr_entry_chunk_path,
                 ssr_module,
                 runtime_entries,
+                Value::new(AvailabilityInfo::Root),
             );
 
             let availability_info = Value::new(AvailabilityInfo::Root);
