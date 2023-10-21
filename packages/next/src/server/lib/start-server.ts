@@ -139,7 +139,7 @@ export async function startServer({
       if (isDev) {
         if (
           v8.getHeapStatistics().used_heap_size >
-          0.8 * v8.getHeapStatistics().heap_size_limit
+          0.9 * v8.getHeapStatistics().heap_size_limit
         ) {
           Log.warn(
             `Server is approaching the used memory threshold, restarting...`
